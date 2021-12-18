@@ -6,42 +6,38 @@
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
       ./hardware-configuration.nix
     ];
 
-  # Use the systemd-boot EFI boot loader.
-  # boot.loader.systemd-boot.enable = true;
-  # boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.grub = {
+    enable = true;
+    devices = [ "nodev" ];
+    efiInstallAsRemovable = true;
+    efiSupport = true;
+  };
 
-  boot.loader.grub.enable = true;
-  boot.loader.grub.devices = [ "nodev" ];
-  boot.loader.grub.efiInstallAsRemovable = true;
-  boot.loader.grub.efiSupport = true;
+  networking = {
+    hostName = "nixos";
+    useDHCP = false;
 
-  networking.hostName = "nixos"; # Define your hostname.
+    interfaces = {
+      enp0s31f6.useDHCP = true;
+      wlp0s20f3.useDHCP = true;
+    };
 
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.wireless.interfaces = [ "wlp0s20f3" ];
-  networking.wireless.networks = {
-    LARVAS = {
-      pskRaw = "995283ad39e2805aa3b2632e0dc57fc151699ae3a27e5c9a397b3cd3cc331ce4";
+    wireless = {
+      enable = true;
+      interfaces = [ "wlp0s20f3" ];
+      networks = {
+        LARVAS = {
+          pskRaw = "995283ad39e2805aa3b2632e0dc57fc151699ae3a27e5c9a397b3cd3cc331ce4";
+        };
+      };
     };
   };
 
-  # Set your time zone.
   time.timeZone = "America/Santiago";
-
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-  networking.interfaces.enp0s31f6.useDHCP = true;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
@@ -52,11 +48,17 @@
   };
 
   # Enable the X11 windowing system.
-  services.xserver.enable = true;
-  services.xserver = {
-    xkbOptions = "caps:swapescape";
-    displayManager.startx.enable = true; # don't start the graphical interface
-    # layout = "la-latin1";
+  services = {
+    xserver = {
+      enable = true;
+      libinput.enable = true; # Enable touchpad support (enabled default in most desktopManager).
+      xkbOptions = "caps:swapescape";
+      displayManager.startx.enable = true; # don't start the graphical interface
+    };
+
+    openssh = {
+      enable = true;
+    };
   };
 
   # Configure keymap in X11
@@ -69,9 +71,6 @@
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  services.xserver.libinput.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.atlas = {
     isNormalUser = true;
@@ -81,23 +80,10 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    vim
     wget
     git
   ];
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];

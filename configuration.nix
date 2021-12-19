@@ -10,6 +10,14 @@
       ./hardware-configuration.nix
     ];
 
+  # activate nix flakes
+  nix = {
+    package = pkgs.nixFlakes;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
+
   boot.loader.grub = {
     enable = true;
     devices = [ "nodev" ];

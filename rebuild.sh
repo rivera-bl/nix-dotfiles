@@ -1,3 +1,11 @@
 #!/bin/sh
+set -e
+
+currentDirectory=$(pwd)
 cd ~/dev/nix-dotfiles
-sudo nixos-rebuild switch -I nixos-config=./configuration.nix
+nix build .#homeManagerConfigurations.atlas.activationPackage
+./result/activate
+nix flake update
+# requires root privileges
+sudo nixos-rebuild switch --flake .#
+cd $currentDirectory
